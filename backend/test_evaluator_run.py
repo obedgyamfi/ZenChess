@@ -15,8 +15,10 @@ pgn_sample = """
 """
 
 if __name__ == "__main__":
-    evaluator = BalanceEvaluator(depth=10, balance_threshold=60.0)
+    evaluator = BalanceEvaluator(depth=10, balance_threshold=40.0, min_delta=0.0)
     results = evaluator.find_balancing_moves(pgn_sample)
     print(f"Found {len(results)} balancing moves:\n")
-    for r in results:
-        print(f"Move {r['move_number']}: {r['move_san']} | {r['score_before']} → {r['score_after']}")
+    print({"count": len(results), "results": results})
+    # for r in results:
+        # print(f"Move {r['move_number']}: {r['move_san']} | {r['eval_before']} → {r['eval_after']}")
+
