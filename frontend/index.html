@@ -1,13 +1,173 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZenChess</title>
+  <link rel="stylesheet" href="/assets/chessboard.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 { margin-bottom: 2rem; }
+    #board { 
+      width: 600px; 
+      margin-bottom: 1rem;
+    }
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #checkBtn {
+      background: #10b981;
+      color: white;
+    }
+    #checkBtn:hover:not(:disabled) {
+      background: #059669;
+    }
+    #newBtn {
+      background: #3b82f6;
+      color: white;
+    }
+    #newBtn:hover:not(:disabled) {
+      background: #2563eb;
+    }
+    #feedback {
+      font-size: 1.25rem;
+      min-height: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>ZenChess Puzzle</h1>
+  <div id="board"></div>
+  <div class="buttons">
+    <button id="checkBtn">Check Balance</button>
+    <button id="newBtn">New Puzzle</button>
+  </div>
+  <div id="feedback"></div>
+
+  <script type="module">
+    import {Chessboard, COLOR, INPUT_EVENT_TYPE} from '/static/node_modules/cm-chessboard/src/Chessboard.js'
+    import {Chess} from '/static/node_modules/chess.js/dist/esm/chess.js'
+
+    const chess = new Chess()
+    let currentPuzzle = null
+    
+    const board = new Chessboard(document.getElementById('board'), {
+      position: chess.fen(),
+      style: {
+        cssClass: 'default',
+        showCoordinates: true
+      },
+      sprite: {
+        url: '/assets/pieces/standard.svg'
+      }
+    })
+
+    const checkBtn = document.getElementById('checkBtn')
+    const newBtn = document.getElementById('newBtn')
+    const feedback = document.getElementById('feedback')
+
+    board.enableMoveInput((event) => {
+      switch (event.type) {
+        case INPUT_EVENT_TYPE.moveInputStarted:
+          return true
+        case INPUT_EVENT_TYPE.validateMoveInput:
+          const move = chess.move({
+            from: event.squareFrom,
+            to: event.squareTo,
+            promotion: 'q'
+          })
+          if (move) {
+            board.setPosition(chess.fen())
+            return true
+          }
+          return false
+      }
+    }, COLOR.white)
+
+    async function loadPuzzle() {
+      try {
+        checkBtn.disabled = true
+        newBtn.disabled = true
+        feedback.textContent = 'Loading puzzle...'
+
+        const res = await fetch('/api/v1/puzzles/random')
+        const data = await res.json()
+        
+        console.log('Puzzle data:', data)
+        
+        if (data.results && data.results.length > 0) {
+          currentPuzzle = data.results[0]
+          console.log('Loading FEN:', currentPuzzle.fen)
+          chess.load(currentPuzzle.fen)
+          board.setPosition(currentPuzzle.fen, true)
+          feedback.textContent = `Find the balancing move! (${currentPuzzle.eval_before}cp → ${currentPuzzle.eval_after}cp)`
+        } else {
+          feedback.textContent = 'No puzzles available'
+        }
+      } catch (error) {
+        console.error('Error loading puzzle:', error)
+        feedback.textContent = 'Error loading puzzle'
+      } finally {
+        checkBtn.disabled = false
+        newBtn.disabled = false
+      }
+    }
+
+    function checkBalance() {
+      if (!currentPuzzle) {
+        feedback.textContent = '❌ Load a puzzle first!'
+        return
+      }
+      
+      const history = chess.history({ verbose: true })
+      if (history.length === 0) {
+        feedback.textContent = '❌ Make a move first!'
+        return
+      }
+
+      const lastMove = history[history.length - 1]
+      const userMove = lastMove.from + lastMove.to
+
+      console.log('User move:', userMove, 'Expected:', currentPuzzle.move_uci)
+
+      if (userMove === currentPuzzle.move_uci) {
+        feedback.textContent = `✅ Correct! ${currentPuzzle.eval_before}cp → ${currentPuzzle.eval_after}cp`
+        checkBtn.disabled = true
+      } else {
+        feedback.textContent = `❌ Wrong move. Try again!`
+        chess.undo()
+        board.setPosition(chess.fen())
+      }
+    }
+
+    checkBtn.addEventListener('click', checkBalance)
+    newBtn.addEventListener('click', loadPuzzle)
+
+    loadPuzzle()
+  </script>
+</body>
 </html>

@@ -1,0 +1,19 @@
+body {
+  background-color: #111;
+  color: #eee;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.chessboard {
+  width: 400px;
+  height: 400px;
+  margin-top: 20px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
