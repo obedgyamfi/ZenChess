@@ -2,8 +2,8 @@ import chess.pgn
 from io import StringIO
 from typing import List, Dict, Any, Optional
 
-from engine import ChessEngine
-from models.puzzle_model import PuzzleDB
+from backend.engine import ChessEngine
+from backend.models.puzzle_model import PuzzleDB
 
 
 class BalanceEvaluator:
@@ -93,19 +93,19 @@ class BalanceEvaluator:
                     "move_san": move_san,
                 }
 
-                # Save to DB
-                try:
-                    self.db.insert_puzzle(
-                        record["game_id"],
-                        record["move_number"],
-                        record["fen_before"],
-                        record["move_uci"],
-                        record["eval_before"],
-                        record["eval_after"],
-                    )
-                except Exception as e:
-                    # non-fatal: log or print in dev; don't crash the whole run
-                    print(f"[Warning] DB insert failed: {e}")
+                # # Save to DB
+                # try:
+                #     self.db.insert_puzzle(
+                #         record["game_id"],
+                #         record["move_number"],
+                #         record["fen_before"],
+                #         record["move_uci"],
+                #         record["eval_before"],
+                #         record["eval_after"],
+                #     )
+                # except Exception as e:
+                #     # non-fatal: log or print in dev; don't crash the whole run
+                #     print(f"[Warning] DB insert failed: {e}")
 
                 results.append(record)
 

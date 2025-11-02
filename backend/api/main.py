@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from api.routes import evaluator_routes
-from db.database import Base, engine
+from backend.api.routes import evaluator_routes
+from backend.db.database import Base, engine
 from pathlib import Path
 
 # --- Initialize DB ---

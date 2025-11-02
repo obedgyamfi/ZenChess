@@ -2,8 +2,8 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional 
 
-from evaluator import BalanceEvaluator
-from models.puzzle_model import PuzzleDB
+from backend.evaluator import BalanceEvaluator
+from backend.models.puzzle_model import PuzzleDB
 
 router = APIRouter()
 db = PuzzleDB()

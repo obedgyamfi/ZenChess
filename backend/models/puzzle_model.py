@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float 
-from db.database import Base
+from backend.db.database import Base
 
 # Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +56,14 @@ class PuzzleDB:
                 (game_id, move_number, fen, move_uci, eval_before, eval_after, delta),
             )
             conn.commit()
+
+    def clear_puzzles(self):
+        """Delete all records from the puzzles table."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM puzzles")
+            conn.commit()
+            print("[DB] Cleared all existing puzzles.")
+
 
     def fetch_random(self, limit=1):
         """Fetch a random set of puzzles."""
