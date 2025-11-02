@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ZenChess</title>
-  <link rel="stylesheet" href="/assets/chessboard.css">
+  <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.base.css">
+  <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.brown.css">
+  <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.cburnett.css">
   <style>
     body {
       margin: 0;
@@ -19,7 +21,8 @@
     }
     h1 { margin-bottom: 2rem; }
     #board { 
-      width: 600px; 
+      width: 600px;
+      height: 600px;
       margin-bottom: 1rem;
     }
     .buttons {
@@ -69,44 +72,48 @@
   <div id="feedback"></div>
 
   <script type="module">
-    import {Chessboard, COLOR, INPUT_EVENT_TYPE} from '/static/node_modules/cm-chessboard/src/Chessboard.js'
-    import {Chess} from '/static/node_modules/chess.js/dist/esm/chess.js'
+    import { Chessground } from 'https://cdnjs.cloudflare.com/ajax/libs/chessground/9.2.1/chessground.min.js'
+    import { Chess } from 'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.js'
 
     const chess = new Chess()
     let currentPuzzle = null
     
-    const board = new Chessboard(document.getElementById('board'), {
-      position: chess.fen(),
-      style: {
-        cssClass: 'default',
-        showCoordinates: true
+    const board = Chessground(document.getElementById('board'), {
+      fen: chess.fen(),
+      coordinates: true,
+      movable: {
+        free: false,
+        color: 'white',
+        events: {
+          after: (orig, dest) => {
+            const move = chess.move({
+              from: orig,
+              to: dest,
+              promotion: 'q'
+            })
+            
+            if (move) {
+              board.set({ fen: chess.fen() })
+            } else {
+              // Invalid move, reset board
+              board.set({ fen: chess.fen() })
+            }
+          }
+        }
       },
-      sprite: {
-        url: '/assets/pieces/standard.svg'
+      events: {
+        move: (orig, dest) => {
+          // Validate move
+          const moves = chess.moves({ verbose: true })
+          const validMove = moves.find(m => m.from === orig && m.to === dest)
+          return !!validMove
+        }
       }
     })
 
     const checkBtn = document.getElementById('checkBtn')
     const newBtn = document.getElementById('newBtn')
     const feedback = document.getElementById('feedback')
-
-    board.enableMoveInput((event) => {
-      switch (event.type) {
-        case INPUT_EVENT_TYPE.moveInputStarted:
-          return true
-        case INPUT_EVENT_TYPE.validateMoveInput:
-          const move = chess.move({
-            from: event.squareFrom,
-            to: event.squareTo,
-            promotion: 'q'
-          })
-          if (move) {
-            board.setPosition(chess.fen())
-            return true
-          }
-          return false
-      }
-    }, COLOR.white)
 
     async function loadPuzzle() {
       try {
@@ -123,7 +130,20 @@
           currentPuzzle = data.results[0]
           console.log('Loading FEN:', currentPuzzle.fen)
           chess.load(currentPuzzle.fen)
-          board.setPosition(currentPuzzle.fen, true)
+          
+          // Determine side to move
+          const turn = chess.turn() === 'w' ? 'white' : 'black'
+          
+          board.set({
+            fen: currentPuzzle.fen,
+            turnColor: turn,
+            movable: {
+              color: turn,
+              free: false,
+              dests: getValidMoves()
+            }
+          })
+          
           feedback.textContent = `Find the balancing move! (${currentPuzzle.eval_before}cp → ${currentPuzzle.eval_after}cp)`
         } else {
           feedback.textContent = 'No puzzles available'
@@ -135,6 +155,17 @@
         checkBtn.disabled = false
         newBtn.disabled = false
       }
+    }
+
+    function getValidMoves() {
+      const dests = new Map()
+      chess.moves({ verbose: true }).forEach(move => {
+        if (!dests.has(move.from)) {
+          dests.set(move.from, [])
+        }
+        dests.get(move.from).push(move.to)
+      })
+      return dests
     }
 
     function checkBalance() {
@@ -157,10 +188,17 @@
       if (userMove === currentPuzzle.move_uci) {
         feedback.textContent = `✅ Correct! ${currentPuzzle.eval_before}cp → ${currentPuzzle.eval_after}cp`
         checkBtn.disabled = true
+        board.set({ movable: { color: undefined } }) // Disable further moves
       } else {
         feedback.textContent = `❌ Wrong move. Try again!`
         chess.undo()
-        board.setPosition(chess.fen())
+        board.set({
+          fen: chess.fen(),
+          movable: {
+            color: chess.turn() === 'w' ? 'white' : 'black',
+            dests: getValidMoves()
+          }
+        })
       }
     }
 
