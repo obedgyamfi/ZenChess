@@ -2,107 +2,257 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZenChess</title>
+
+  <!-- kept your original CSS URLs exactly as provided -->
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.base.css">
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.brown.css">
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.cburnett.css">
   <style>
-    body {
+    /* ================================
+   CHESS TRAINER — Responsive Theme
+   ================================ */
+
+    /* --- Base Theme Colors --- */
+    :root {
+      --bg: #0e1012;
+      --panel: #161718;
+      --muted: #94a3b8;
+      --accent: #10b981;
+      --accent-2: #3b82f6;
+      --card: #1f2224;
+      --glass: rgba(255, 255, 255, 0.04);
+      --danger: #ef4444;
+    }
+
+    /* --- Reset / Global --- */
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
-      background: #1a1a1a;
-      color: #fff;
-      font-family: system-ui, -apple-system, sans-serif;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background: linear-gradient(180deg, var(--bg), #0b0b0b 60%);
+      color: #e6eef6;
+      font-family: system-ui, -apple-system, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
+      padding: 16px;
+      gap: 16px;
     }
 
+    /* --- Text --- */
     h1 {
-      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #e6eef6;
+      letter-spacing: -0.02em;
+      text-align: center;
     }
 
     .instruction {
-      margin-bottom: 2rem;
+      color: var(--muted);
+      font-size: 0.95rem;
       text-align: center;
-      color: #9ca3af;
-      font-size: 1.1rem;
+      margin-bottom: 4px;
     }
 
-    .game-container {
-      display: flex;
-      gap: 2rem;
-      align-items: flex-start;
-      margin-bottom: 1rem;
-    }
-
-    #board {
-      width: 600px;
-      height: 600px;
-    }
-
-    .piece-selector {
+    /* --- Layout Container --- */
+    .game-frame {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      padding: 1.5rem;
-      background: #2a2a2a;
-      border-radius: 8px;
-      min-width: 120px;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 1200px;
     }
 
-    .piece-selector h3 {
-      margin: 0 0 0.5rem 0;
-      text-align: center;
-      font-size: 1rem;
-      color: #9ca3af;
+    /* --- Board --- */
+    #board {
+      width: 92vw;
+      max-width: 640px;
+      aspect-ratio: 1 / 1;
+      background: var(--panel);
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(2, 6, 23, 0.6);
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.2s ease-in-out;
     }
 
-    .piece-option {
-      width: 80px;
-      height: 80px;
-      background: #3a3a3a;
-      border: 3px solid transparent;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
+    #board:active {
+      transform: scale(0.995);
+    }
+
+    .turn-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 92vw;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 14px rgba(2, 6, 23, 0.4);
+    }
+
+    .selector-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 4px 0;
+    }
+
+    .selector-row .piece-option {
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid transparent;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
+      font-size: 1.6rem;
+      color: #dbeafe;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .selector-row .piece-option:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .selector-row .piece-option.selected {
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    /* Row 2 — button */
+    #newBtn {
+      background: linear-gradient(180deg, var(--accent-2), #2563eb);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s ease;
+      min-width: 120px;
+      min-height: 44px;
+      box-shadow: 0 6px 16px rgba(2, 6, 23, 0.5);
+    }
+
+    #newBtn:hover {
+      transform: translateY(-3px);
+    }
+
+    /* Row 3 — feedback */
+    #feedback {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      min-height: 28px;
+      width: 100%;
+    }
+
+    .turn-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .turn-badge {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: var(--glass);
+      font-size: 1.2rem;
+      color: var(--accent);
+      box-shadow: 0 6px 12px rgba(2, 6, 23, 0.5);
+    }
+
+    /* --- Piece Selector --- */
+    .piece-selector {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 640px;
+      overflow-x: auto;
+      padding: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .piece-selector::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .piece-selector::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .piece-option {
+      flex: 0 0 auto;
+      width: 56px;
+      height: 56px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #dbeafe;
+      cursor: pointer;
+      transition: 0.2s all;
     }
 
     .piece-option:hover {
-      background: #4a4a4a;
-      transform: scale(1.05);
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .piece-option.selected {
-      border-color: #10b981;
-      background: #1a3a2a;
-    }
-
-    .piece-option.correct {
-      border-color: #10b981;
-      background: #1a3a2a;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
+      border-color: var(--accent);
+      background: rgba(16, 185, 129, 0.08);
     }
 
     button {
-      padding: 0.75rem 1.5rem;
+      flex: 1;
+      padding: 10px 4px;
+      border-radius: 10px;
+      background: var(--glass);
+      color: #dbeafe;
+      font-weight: 600;
       border: none;
-      border-radius: 6px;
-      font-size: 1rem;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.06);
     }
 
     button:disabled {
@@ -110,63 +260,88 @@
       cursor: not-allowed;
     }
 
-    #newBtn {
-      background: #3b82f6;
-      color: white;
-    }
+    /* --- Desktop Layout --- */
+    @media (min-width: 880px) {
+      body {
+        padding: 32px;
+      }
 
-    #newBtn:hover:not(:disabled) {
-      background: #2563eb;
-    }
+      .game-frame {
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 32px;
+      }
 
-    #feedback {
-      font-size: 1.25rem;
-      min-height: 30px;
-      text-align: center;
-    }
+      #board {
+        width: clamp(640px, 48vw, 820px);
+      }
 
-    .ghost-piece {
-      opacity: 0.3;
+      .piece-selector {
+        flex-direction: column;
+        width: 220px;
+        max-width: 240px;
+        height: auto;
+        overflow: visible;
+        background: var(--glass);
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .piece-option {
+        width: 64px;
+        height: 64px;
+        font-size: 1.8rem;
+      }
     }
   </style>
 </head>
 
 <body>
   <h1>ZenChess Puzzle</h1>
-  <div class="instruction">Find the missing piece that balances the position</div>
+  <!-- <div class="instruction">Find the missing piece that balances the position — mobile first, touch friendly.</div> -->
+  <div id="feedback" aria-live="polite"></div>
 
-  <div class="game-container">
-    <div id="board"></div>
-    <div class="piece-selector">
-      <h3>Select Piece</h3>
-      <div id="pieceOptions"></div>
+  <div class="game-frame">
+    <div class="game-container">
+      <div id="board"></div>
+
+      <div class="turn-indicator" role="status" aria-live="polite">
+        <div class="selector-row" id="pieceOptions" role="list"></div>
+        <button id="newBtn" aria-label="Load new puzzle">Next</button>
+
+      </div>
     </div>
   </div>
 
-  <div class="buttons">
-    <button id="newBtn">New Puzzle</button>
-  </div>
-  <div id="feedback"></div>
-
+  <!-- keep your module imports / URLs intact -->
   <script type="module">
     import { Chessground } from 'https://cdnjs.cloudflare.com/ajax/libs/chessground/9.2.1/chessground.min.js'
     import { Chess } from 'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.js'
-
 
     const chess = new Chess()
     let currentPuzzle = null
     let selectedPiece = null
     let hiddenPieceSquare = null
     let hiddenPieceType = null
+    let currentPuzzleFenWithoutPiece = null
 
     const pieceSymbols = {
       'wq': '♕', 'wr': '♖', 'wb': '♗', 'wn': '♘', 'wp': '♙',
       'bq': '♛', 'br': '♜', 'bb': '♝', 'bn': '♞', 'bp': '♟'
     }
 
-    const board = Chessground(document.getElementById('board'), {
+    const boardEl = document.getElementById('board')
+    const newBtn = document.getElementById('newBtn')
+    const feedback = document.getElementById('feedback')
+    const pieceOptionsEl = document.getElementById('pieceOptions')
+
+    // Initialize chessground board with minimal interaction (click to place via our logic)
+    const board = Chessground(boardEl, {
       fen: chess.fen(),
       coordinates: true,
+      highlight: { lastMove: false, check: false },
       movable: {
         free: false,
         color: undefined
@@ -177,51 +352,39 @@
             placePiece(square)
           }
         }
-      }
+      },
+      animation: { enabled: true }
     })
-
-    const newBtn = document.getElementById('newBtn')
-    const feedback = document.getElementById('feedback')
-    const pieceOptionsEl = document.getElementById('pieceOptions')
 
     function generateDecoyPieces(correctPiece) {
       const pieceTypes = ['q', 'r', 'b', 'n', 'p']
       const color = correctPiece[0] // 'w' or 'b'
       const correctType = correctPiece[1]
 
-      // Remove correct piece type
-      const availableTypes = pieceTypes.filter(t => t !== correctType)
-
-      // Pick one random decoy
-      const decoyType = availableTypes[Math.floor(Math.random() * availableTypes.length)]
-
-      // return [correctPiece, color + decoyType]
+      // Keep your logic: return only the correct piece (you had a reason)
       return [correctPiece]
     }
 
     function renderPieceSelector(pieces) {
       pieceOptionsEl.innerHTML = ''
-
-      // Shuffle pieces for display
       const shuffled = [...pieces].sort(() => Math.random() - 0.5)
 
       shuffled.forEach(piece => {
-        const option = document.createElement('div')
+        const option = document.createElement('button')
         option.className = 'piece-option'
         option.dataset.piece = piece
-        option.textContent = pieceSymbols[piece]
+        option.setAttribute('role', 'button')
+        option.setAttribute('aria-label', `Piece ${piece}`)
+        option.innerText = pieceSymbols[piece] || '?'
 
         option.addEventListener('click', () => {
-          // Remove previous selection
-          document.querySelectorAll('.piece-option').forEach(el => {
-            el.classList.remove('selected')
-          })
-
+          // Deselect previous
+          document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
           selectedPiece = piece
           option.classList.add('selected')
-          feedback.textContent = `Click on the board to place the ${pieceSymbols[piece]}`
+          feedback.textContent = `Tap an empty square on the board to place ${pieceSymbols[piece]}`
+          // show piece on turn badge for clarity
         })
-
         pieceOptionsEl.appendChild(option)
       })
     }
@@ -282,59 +445,59 @@
       const color = selectedPiece[0] === 'w' ? 'white' : 'black'
       const pieceType = selectedPiece[1]
 
-      // Place the piece on the board to show it
+      // Temporarily place the piece on the board
       chess.put({ type: pieceType, color: color === 'white' ? 'w' : 'b' }, square)
       board.set({ fen: chess.fen() })
 
-      // Check if it's the correct piece type
+      // Wrong type
       if (selectedPiece !== hiddenPieceType) {
-        feedback.textContent = `❌ Wrong piece! The ${pieceSymbols[selectedPiece]} doesn't balance the position.`
+        feedback.textContent = `❌ Wrong piece. ${pieceSymbols[selectedPiece]} doesn't balance the position.`
 
-        // Highlight correct piece
+        // highlight correct piece
         document.querySelectorAll('.piece-option').forEach(el => {
-          if (el.dataset.piece === hiddenPieceType) {
-            el.classList.add('correct')
-          }
+          if (el.dataset.piece === hiddenPieceType) el.classList.add('correct')
         })
 
-        // Reset board after delay
         setTimeout(() => {
           chess.load(getCurrentPuzzleFen())
           board.set({ fen: chess.fen() })
-        }, 1500)
+          // clear selection but keep correct marker
+          selectedPiece = null
+          document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
+        }, 1200)
 
         return
       }
 
-      // Check if it's the correct square
+      // Wrong square
       if (square !== hiddenPieceSquare) {
         feedback.textContent = '❌ Wrong square! Try again.'
 
-        // Reset board after delay
         setTimeout(() => {
           chess.load(getCurrentPuzzleFen())
           board.set({ fen: chess.fen() })
-        }, 1500)
+          selectedPiece = null
+          document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
+        }, 1200)
 
         return
       }
 
-      // Correct! Keep the piece on the board
+      // Correct!
       feedback.textContent = `✅ Correct! ${pieceSymbols[selectedPiece]} on ${square} balances the position! (${currentPuzzle.eval_before}cp → ${currentPuzzle.eval_after}cp)`
-
-      // Disable further interaction
-      selectedPiece = null
-      document.querySelectorAll('.piece-option').forEach(el => {
-        el.style.cursor = 'default'
-        el.style.opacity = '0.5'
-      })
+      disableInteractionAfterSuccess()
     }
 
-    // Helper to get the current puzzle FEN without the hidden piece
-    let currentPuzzleFenWithoutPiece = null
-
-    // Update in loadPuzzle() after removing the piece:
-    // currentPuzzleFenWithoutPiece = modifiedFen
+    function disableInteractionAfterSuccess() {
+      // disable piece options
+      document.querySelectorAll('.piece-option').forEach(el => {
+        el.disabled = true
+        el.style.opacity = '0.6'
+        el.style.cursor = 'default'
+      })
+      // remove selection
+      selectedPiece = null
+    }
 
     function getCurrentPuzzleFen() {
       return currentPuzzleFenWithoutPiece
@@ -349,44 +512,45 @@
 
         const res = await fetch('/api/v1/puzzles/random')
         const data = await res.json()
-
         console.log('Puzzle data:', data)
 
         if (data.results && data.results.length > 0) {
           currentPuzzle = data.results[0]
 
-          // Parse the move to get source and destination
-          const move = currentPuzzle.move_uci
-          const sourceSquare = move.substring(0, 2) // e.g., "g5e3" -> "g5"
-          hiddenPieceSquare = move.substring(2, 4) // e.g., "g5e3" -> "e3"
+          // Parse move UCI: source (first two chars) and destination (next two)
+          const move = currentPuzzle.move_uci || ''
+          const sourceSquare = move.substring(0, 2)
+          hiddenPieceSquare = move.substring(2, 4)
 
-          // Load the position and get the piece at SOURCE square
+          // Load original FEN to inspect the piece at source
           chess.load(currentPuzzle.fen)
           const pieceAtSquare = chess.get(sourceSquare)
 
           if (!pieceAtSquare) {
-            feedback.textContent = 'Error: Invalid puzzle data (no piece at source)'
+            feedback.textContent = 'Error: Invalid puzzle data (no piece at source).'
             console.error('No piece found at source square:', sourceSquare)
+            newBtn.disabled = false
             return
           }
 
           hiddenPieceType = pieceAtSquare.color + pieceAtSquare.type
 
-          // Remove the piece from the SOURCE square
+          // remove the piece from the SOURCE square to create the puzzle board
           const modifiedFen = removePieceFromBoard(currentPuzzle.fen, sourceSquare)
           currentPuzzleFenWithoutPiece = modifiedFen
           chess.load(modifiedFen)
 
-          // Update board display
+          // Update board display and reset movable settings
           board.set({
             fen: chess.fen(),
             movable: { color: undefined }
           })
 
-          // Generate piece options (correct + 1 decoy)
+          // Generate options (kept your logic)
           const pieceOptions = generateDecoyPieces(hiddenPieceType)
           renderPieceSelector(pieceOptions)
 
+          // UI hints
           feedback.textContent = `Select the piece that belongs on the board to balance the position`
         } else {
           feedback.textContent = 'No puzzles available'
@@ -401,6 +565,7 @@
 
     newBtn.addEventListener('click', loadPuzzle)
 
+    // initialize on first load
     loadPuzzle()
   </script>
 </body>
