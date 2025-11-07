@@ -6,14 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ZenChess</title>
 
-  <!-- kept your original CSS URLs exactly as provided -->
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.base.css">
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.brown.css">
   <link rel="stylesheet" href="https://unpkg.com/chessground@8.3.11/assets/chessground.cburnett.css">
   <style>
-    /* ================================
-   CHESS TRAINER — Responsive Theme
-   ================================ */
 
     /* --- Base Theme Colors --- */
     :root {
@@ -378,12 +374,16 @@
         option.innerText = pieceSymbols[piece] || '?'
 
         option.addEventListener('click', () => {
-          // Deselect previous
+          if (option.classList.contains('selected')) {
+            option.classList.remove('selected')
+            selectedPiece = null 
+            feedback.textContent = 'Select a piece to place'
+            return
+          }
           document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
           selectedPiece = piece
           option.classList.add('selected')
           feedback.textContent = `Tap an empty square on the board to place ${pieceSymbols[piece]}`
-          // show piece on turn badge for clarity
         })
         pieceOptionsEl.appendChild(option)
       })
@@ -476,8 +476,8 @@
         setTimeout(() => {
           chess.load(getCurrentPuzzleFen())
           board.set({ fen: chess.fen() })
-          selectedPiece = null
-          document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
+          // selectedPiece = null
+          // document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
         }, 1200)
 
         return
