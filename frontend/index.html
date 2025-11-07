@@ -450,35 +450,35 @@
       board.set({ fen: chess.fen() })
 
       // Wrong type
-      if (selectedPiece !== hiddenPieceType) {
-        feedback.textContent = `❌ Wrong piece. ${pieceSymbols[selectedPiece]} doesn't balance the position.`
+      // if (selectedPiece !== hiddenPieceType) {
+      //   feedback.textContent = `❌ Wrong piece. ${pieceSymbols[selectedPiece]} doesn't balance the position.`
 
-        // highlight correct piece
-        document.querySelectorAll('.piece-option').forEach(el => {
-          if (el.dataset.piece === hiddenPieceType) el.classList.add('correct')
-        })
+      //   // highlight correct piece
+      //   document.querySelectorAll('.piece-option').forEach(el => {
+      //     if (el.dataset.piece === hiddenPieceType) el.classList.add('correct')
+      //   })
 
-        setTimeout(() => {
-          chess.load(getCurrentPuzzleFen())
-          board.set({ fen: chess.fen() })
-          // clear selection but keep correct marker
-          selectedPiece = null
-          document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
-        }, 1200)
+      //   setTimeout(() => {
+      //     chess.load(getCurrentPuzzleFen())
+      //     board.set({ fen: chess.fen() })
+      //     // clear selection but keep correct marker
+      //     // selectedPiece = null
+      //     // document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
+      //   }, 1200)
 
-        return
-      }
+      //   return
+      // }
 
       // Wrong square
       if (square !== hiddenPieceSquare) {
         feedback.textContent = '❌ Wrong square! Try again.'
 
         setTimeout(() => {
-          chess.load(getCurrentPuzzleFen())
-          board.set({ fen: chess.fen() })
+          chess.load(getCurrentPuzzleFen());
+          board.set({ fen: chess.fen() });
           // selectedPiece = null
           // document.querySelectorAll('.piece-option').forEach(el => el.classList.remove('selected'))
-        }, 1200)
+        }, 1200);
 
         return
       }
