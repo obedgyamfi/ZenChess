@@ -349,7 +349,7 @@
           }
         }
       },
-      animation: { enabled: true }
+      animation: { enabled: true },
     })
 
     function generateDecoyPieces(correctPiece) {
@@ -540,10 +540,14 @@
           currentPuzzleFenWithoutPiece = modifiedFen
           chess.load(modifiedFen)
 
+          const playerColor = chess.turn();
+          const orientation = playerColor === 'w' ? 'white' : 'black';
+
           // Update board display and reset movable settings
           board.set({
             fen: chess.fen(),
-            movable: { color: undefined }
+            movable: { color: undefined },
+            orientation: orientation
           })
 
           // Generate options (kept your logic)
